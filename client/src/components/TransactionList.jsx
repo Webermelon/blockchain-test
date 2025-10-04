@@ -2,7 +2,7 @@ import { useTransaction } from "../context/TransactionContext";
 import { useEffect, useState } from "react";
 
 const TransactionList = () => {
-    const { transactions, getAllTransactions, currentAccount, isLoading } = useTransaction();
+    const { transactions, loadAllTransactions, currentAccount, truncateAddress } = useTransaction();
     const [isLoadingTransactions, setIsLoadingTransactions] = useState(false);
     const [refreshKey, setRefreshKey] = useState(0);
 
@@ -11,7 +11,7 @@ const TransactionList = () => {
             if (currentAccount) {
                 setIsLoadingTransactions(true);
                 try {
-                    await getAllTransactions();
+                    await loadAllTransactions();
                 } catch (error) {
                     console.error("Error fetching transactions:", error);
                 } finally {
@@ -22,12 +22,6 @@ const TransactionList = () => {
 
         fetchTransactions();
     }, [currentAccount, refreshKey]);
-
-    // Helper function to truncate address
-    const truncateAddress = (address) => {
-        if (!address) return 'N/A';
-        return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
-    };
 
     // Helper function to get keyword badge color
     const getKeywordBadgeColor = (keyword) => {
@@ -51,8 +45,6 @@ const TransactionList = () => {
     const handleRefresh = () => {
         setRefreshKey(prev => prev + 1);
     };
-
-
 
     if (!currentAccount) {
         return (

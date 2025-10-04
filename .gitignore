@@ -1,5 +1,6 @@
 # Dependencies
 node_modules/
+package-lock.json
 
 # Environment variables
 .env
@@ -11,4 +12,3 @@ build/
 # Hardhat specific
 artifacts/
 cache/
-typechain-types/

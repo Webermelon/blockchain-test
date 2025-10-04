@@ -1,33 +1,7 @@
 import { useTransaction } from "../context/TransactionContext";
-import { useState, useEffect } from "react";
-import { ethers } from "ethers";
 
 const Wallet = () => {
-    const { connectWallet, currentAccount, transactionCount } = useTransaction();
-    const [balance, setBalance] = useState('0');
-
-    // Helper function to truncate address
-    const truncateAddress = (address) => {
-        if (!address) return 'Not Connected';
-        return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
-    };
-
-    // Fetch wallet balance
-    useEffect(() => {
-        const getBalance = async () => {
-            if (currentAccount && window.ethereum) {
-                try {
-                    const provider = new ethers.BrowserProvider(window.ethereum);
-                    const balance = await provider.getBalance(currentAccount);
-                    setBalance(ethers.formatEther(balance));
-                } catch (error) {
-                    console.error("Error fetching balance:", error);
-                }
-            }
-        };
-
-        getBalance();
-    }, [currentAccount]);
+    const { connectWallet, currentAccount, transactionCount, balance, truncateAddress } = useTransaction();
 
     return (
         <div className="bg-white rounded-lg shadow-lg p-6">

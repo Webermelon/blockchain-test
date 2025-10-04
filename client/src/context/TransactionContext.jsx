@@ -2,7 +2,7 @@ import { createContext, useState, useEffect, useContext } from "react";
 
 import { ethers } from "ethers";
 
-import { contractABI, contractAddress } from "../utils/constants";
+import { TransactionsContractABI, TransactionsContractAddress } from "../utils/constants";
 
 export const TransactionContext = createContext();
 
@@ -14,23 +14,24 @@ export const useTransaction = () => {
     return context;
 };
 
-const { ethereum } = window;
-
-const getEthereumContract = async () => {
-    const provider = new ethers.BrowserProvider(ethereum);
-    const signer = await provider.getSigner();
-    const transactionsContract = new ethers.Contract(contractAddress, contractABI, signer);
-
-    return transactionsContract;
-};
-
 export const TransactionProvider = ({ children }) => {
 
+    const { ethereum } = window;
+
     const [currentAccount, setCurrentAccount] = useState('');
+    const [balance, setBalance] = useState('0');
     const [formData, setFormData] = useState({ addressTo: '', amount: '', keyword: '', message: '' });
     const [isLoading, setIsLoading] = useState(false);
     const [transactionCount, setTransactionCount] = useState(0);
     const [transactions, setTransactions] = useState([]);
+
+    const getEthereumTransactionsContract = async () => {
+        const provider = new ethers.BrowserProvider(ethereum);
+        const signer = await provider.getSigner();
+        const transactionsContract = new ethers.Contract(TransactionsContractAddress, TransactionsContractABI, signer);
+
+        return transactionsContract;
+    };
 
     const handleChange = (e, name) => {
         setFormData((prevState) => ({ ...prevState, [name]: e.target.value }));
@@ -58,7 +59,7 @@ export const TransactionProvider = ({ children }) => {
                         return key.replace('tx_', '');
                     }
                 } catch (e) {
-                    // Skip invalid entries
+                    console.error("Error parsing transaction from localStorage:", e);
                 }
             }
         }
@@ -74,7 +75,6 @@ export const TransactionProvider = ({ children }) => {
                 setCurrentAccount(accounts[0]);
             }
         } catch (error) {
-
             throw new Error("No Ethereum object.");
         }
     };
@@ -90,16 +90,14 @@ export const TransactionProvider = ({ children }) => {
         }
     };
 
-
-
-    const getAllTransactions = async () => {
+    const loadAllTransactions = async () => {
         try {
             if (!ethereum) return;
 
-            const transactionsContract = await getEthereumContract();
+            const transactionsContract = await getEthereumTransactionsContract();
             const availableTransactions = await transactionsContract.getAllTransactions();
 
-            const structuredTransactions = availableTransactions.map((transaction) => {
+            const structuredTransactions = availableTransactions.map(transaction => {
                 const amount = parseInt(transaction.amount) / (10 ** 18);
                 const hash = getTransactionHash(
                     transaction.sender,
@@ -121,8 +119,11 @@ export const TransactionProvider = ({ children }) => {
             });
 
             setTransactions(structuredTransactions);
+
+            const newCount = await transactionsContract.getTransactionCount();
+            setTransactionCount(Number(newCount));
         } catch (error) {
-            // Handle error silently
+            console.error("Error fetching transactions:", error);
         }
     };
 
@@ -131,7 +132,7 @@ export const TransactionProvider = ({ children }) => {
             if (!ethereum) return alert("Please install MetaMask.");
 
             setIsLoading(true);
-            const transactionsContract = await getEthereumContract();
+            const transactionsContract = await getEthereumTransactionsContract();
             const parsedAmount = ethers.parseEther(amount);
 
             const transactionHash = await transactionsContract.addToBlockchain(
@@ -154,10 +155,11 @@ export const TransactionProvider = ({ children }) => {
             await transactionHash.wait();
             alert(`Transaction sent! Hash: ${transactionHash.hash}`);
 
+            // TODO: Add timestamp or more unique data to distinguish transactions hash collisions
+            console.log('Transaction sent!', transactionHash);
+
             // Refresh data
-            const newCount = await transactionsContract.getTransactionCount();
-            setTransactionCount(Number(newCount));
-            await getAllTransactions();
+            await loadAllTransactions();
             setFormData({ addressTo: '', amount: '', keyword: '', message: '' });
 
         } catch (error) {
@@ -169,20 +171,41 @@ export const TransactionProvider = ({ children }) => {
 
     useEffect(() => {
         checkIfWalletIsConnected();
-    }, [transactionCount]);
+    }, []);
+
+    useEffect(() => {
+        const getBalance = async () => {
+            if (currentAccount) {
+                try {
+                    const provider = new ethers.BrowserProvider(ethereum);
+                    const balance = await provider.getBalance(currentAccount);
+                    setBalance(ethers.formatEther(balance));
+                } catch (error) {
+                    console.error("Error fetching balance:", error);
+                }
+            }
+        };
+
+        getBalance();
+    }, [currentAccount]);
 
     return (
         <TransactionContext.Provider value={{
+            getEthereumTransactionsContract,
             connectWallet,
+            balance,
             currentAccount,
             formData,
-            setFormData,
             handleChange,
             sendTransaction,
-            getAllTransactions,
+            loadAllTransactions,
             transactions,
             transactionCount,
-            isLoading
+            isLoading,
+            truncateAddress: (address) => {
+                if (!address) return 'Not Connected';
+                return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+            },
         }}>
             {children}
         </TransactionContext.Provider>

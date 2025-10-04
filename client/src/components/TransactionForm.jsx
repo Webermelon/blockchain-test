@@ -71,7 +71,7 @@ const TransactionForm = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Recipient Address *
+                        Recipient Address <span className="text-red-500">*</span>
                     </label>
                     <input
                         type="text"
@@ -79,15 +79,14 @@ const TransactionForm = () => {
                         value={formData.addressTo}
                         placeholder="0x..."
                         onChange={(e) => handleChange(e, 'addressTo')}
-                        className={`w-full p-3 border rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent ${errors.addressTo ? 'border-red-500' : 'border-gray-300'
-                            }`}
+                        className={`w-full p-3 border rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent ${errors.addressTo ? 'border-red-500' : 'border-gray-300'}`}
                     />
                     {errors.addressTo && <p className="text-red-500 text-sm mt-1">{errors.addressTo}</p>}
                 </div>
 
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Amount (ETH) *
+                        Amount (ETH) <span className="text-red-500">*</span>
                     </label>
                     <input
                         type="number"
@@ -97,23 +96,21 @@ const TransactionForm = () => {
                         value={formData.amount}
                         placeholder="0.01"
                         onChange={(e) => handleChange(e, 'amount')}
-                        className={`w-full p-3 border rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent ${errors.amount ? 'border-red-500' : 'border-gray-300'
-                            }`}
+                        className={`w-full p-3 border rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent ${errors.amount ? 'border-red-500' : 'border-gray-300'}`}
                     />
                     {errors.amount && <p className="text-red-500 text-sm mt-1">{errors.amount}</p>}
                 </div>
 
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Transaction Type *
+                        Transaction Type <span className="text-red-500">*</span>
                     </label>
                     <select
                         name="keyword"
                         required
                         value={formData.keyword}
                         onChange={(e) => handleChange(e, 'keyword')}
-                        className={`w-full p-3 border rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent ${errors.keyword ? 'border-red-500' : 'border-gray-300'
-                            }`}
+                        className={`w-full p-3 border rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent ${errors.keyword ? 'border-red-500' : 'border-gray-300'}`}
                     >
                         <option value="">Select transaction type</option>
                         <option value="transfer">💸 Transfer</option>
