@@ -3,6 +3,7 @@ import { createContext, useState, useEffect, useContext } from "react";
 import { ethers } from "ethers";
 
 import { TransactionsContractABI, TransactionsContractAddress } from "../utils/constants";
+import { useEthereum } from "./EthereumContext";
 
 export const TransactionContext = createContext();
 
@@ -18,8 +19,8 @@ export const TransactionProvider = ({ children }) => {
 
     const { ethereum } = window;
 
-    const [currentAccount, setCurrentAccount] = useState('');
-    const [balance, setBalance] = useState('0');
+    const { currentAccount } = useEthereum();
+
     const [formData, setFormData] = useState({ addressTo: '', amount: '', keyword: '', message: '' });
     const [isLoading, setIsLoading] = useState(false);
     const [transactionCount, setTransactionCount] = useState(0);
@@ -87,30 +88,6 @@ export const TransactionProvider = ({ children }) => {
             }
         }
         return null;
-    };
-
-    const checkIfWalletIsConnected = async () => {
-        try {
-            if (!ethereum) return alert("Please install MetaMask.");
-            const accounts = await ethereum.request({ method: "eth_accounts" });
-
-            if (accounts.length) {
-                setCurrentAccount(accounts[0]);
-            }
-        } catch (error) {
-            throw new Error("No Ethereum object.");
-        }
-    };
-
-    const connectWallet = async () => {
-        try {
-            if (!ethereum) return alert("Please install MetaMask.");
-            const accounts = await ethereum.request({ method: "eth_requestAccounts" });
-            setCurrentAccount(accounts[0]);
-            window.location.reload();
-        } catch (error) {
-            throw new Error("No Ethereum object.");
-        }
     };
 
     const loadAllTransactions = async () => {
@@ -196,31 +173,11 @@ export const TransactionProvider = ({ children }) => {
 
     useEffect(() => {
         cleanUpOldTransactions(); // Clean up old transactions (older than 7 days)
-        checkIfWalletIsConnected();
     }, []);
-
-    useEffect(() => {
-        const getBalance = async () => {
-            if (currentAccount) {
-                try {
-                    const provider = new ethers.BrowserProvider(ethereum);
-                    const balance = await provider.getBalance(currentAccount);
-                    setBalance(ethers.formatEther(balance));
-                } catch (error) {
-                    console.error("Error fetching balance:", error);
-                }
-            }
-        };
-
-        getBalance();
-    }, [currentAccount]);
 
     return (
         <TransactionContext.Provider value={{
             getEthereumTransactionsContract,
-            connectWallet,
-            balance,
-            currentAccount,
             formData,
             handleChange,
             sendTransaction,
@@ -228,10 +185,6 @@ export const TransactionProvider = ({ children }) => {
             transactions,
             transactionCount,
             isLoading,
-            truncateAddress: (address) => {
-                if (!address) return 'Not Connected';
-                return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
-            },
         }}>
             {children}
         </TransactionContext.Provider>

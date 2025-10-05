@@ -1,8 +1,10 @@
+import { useEthereum } from "../context/EthereumContext";
 import { useTransaction } from "../context/TransactionContext";
 import { useState } from "react";
 
 const TransactionForm = () => {
-    const { formData, handleChange, sendTransaction, isLoading, currentAccount } = useTransaction();
+    const { currentAccount } = useEthereum();
+    const { formData, handleChange, sendTransaction, isLoading } = useTransaction();
     const [errors, setErrors] = useState({});
 
     const validateForm = () => {

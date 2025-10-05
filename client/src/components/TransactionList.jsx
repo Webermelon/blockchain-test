@@ -1,8 +1,10 @@
+import { useEthereum } from "../context/EthereumContext";
 import { useTransaction } from "../context/TransactionContext";
 import { useEffect, useState } from "react";
 
 const TransactionList = () => {
-    const { transactions, loadAllTransactions, currentAccount, truncateAddress } = useTransaction();
+    const { transactions, loadAllTransactions } = useTransaction();
+    const { currentAccount, truncateAddress } = useEthereum();
     const [isLoadingTransactions, setIsLoadingTransactions] = useState(false);
     const [refreshKey, setRefreshKey] = useState(0);
 
@@ -150,12 +152,12 @@ const TransactionList = () => {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             {transaction.hash ? (
-                                                <div className="flex flex-col space-y-1">
+                                                <div className="flex flex-col items-center space-y-1">
                                                     <a
                                                         href={`https://sepolia.etherscan.io/tx/${transaction.hash}`}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
-                                                        className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors group"
+                                                        className="inline-flex w-max items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors group"
                                                         title={`View on Etherscan: ${transaction.hash}`}
                                                     >
                                                         <svg className="w-3 h-3 mr-1 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -1,7 +1,9 @@
+import { useEthereum } from "../context/EthereumContext";
 import { useTransaction } from "../context/TransactionContext";
 
 const Wallet = () => {
-    const { connectWallet, currentAccount, transactionCount, balance, truncateAddress } = useTransaction();
+    const { transactionCount } = useTransaction();
+    const { appMode, setAppMode, connectWallet, currentAccount, balance, truncateAddress } = useEthereum();
 
     return (
         <div className="h-max bg-white rounded-lg shadow-lg p-6">
@@ -63,6 +65,22 @@ const Wallet = () => {
                     </p>
                 </div>
             )}
+
+            <h2 className="text-xl font-bold text-gray-800 mt-8 border-t border-gray-300 pt-3">App Mode</h2>
+            <div className="mt-4 flex space-x-4">
+                <button
+                    className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors duration-200 ${appMode === 'transactions' ? 'bg-purple-500 text-white hover:bg-purple-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                    onClick={() => setAppMode('transactions')}
+                >
+                    Transactions
+                </button>
+                <button
+                    className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors duration-200 ${appMode === 'votes' ? 'bg-purple-500 text-white hover:bg-purple-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                    onClick={() => setAppMode('votes')}
+                >
+                    Votes
+                </button>
+            </div>
         </div>
     );
 };
