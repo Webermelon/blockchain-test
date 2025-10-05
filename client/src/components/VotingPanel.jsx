@@ -33,7 +33,7 @@ const VotingPanel = () => {
 
     if (!currentAccount) {
         return (
-            <div className="bg-white rounded-lg shadow-lg p-6">
+            <div className="bg-white h-max rounded-lg shadow-lg p-6">
                 <h2 className="text-xl font-bold text-gray-800 mb-4">Voting Panel</h2>
                 <div className="text-center p-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
                     <div className="text-gray-400 text-4xl mb-4">🗳️</div>
@@ -44,7 +44,7 @@ const VotingPanel = () => {
     }
 
     return (
-        <div className="bg-white rounded-lg shadow-lg p-6">
+        <div className="bg-white h-max rounded-lg shadow-lg p-6">
             <h2 className="text-xl font-bold text-gray-800 mb-4">Voting Panel</h2>
 
             {/* Voting Status */}
@@ -103,8 +103,8 @@ const VotingPanel = () => {
                                 onClick={() => toggleVoting(!votingActive)}
                                 disabled={isLoading}
                                 className={`w-full py-2 px-4 rounded-md font-medium transition-colors ${votingActive
-                                        ? 'bg-red-500 hover:bg-red-600 text-white'
-                                        : 'bg-green-500 hover:bg-green-600 text-white'
+                                    ? 'bg-red-500 hover:bg-red-600 text-white'
+                                    : 'bg-green-500 hover:bg-green-600 text-white'
                                     } disabled:bg-gray-400 disabled:cursor-not-allowed`}
                             >
                                 {votingActive ? 'Stop Voting' : 'Start Voting'}

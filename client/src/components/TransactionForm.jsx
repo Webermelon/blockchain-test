@@ -56,7 +56,7 @@ const TransactionForm = () => {
 
     if (!currentAccount) {
         return (
-            <div className="bg-white rounded-lg shadow-lg p-6">
+            <div className="bg-white h-max rounded-lg shadow-lg p-6">
                 <h2 className="text-xl font-bold text-gray-800 mb-4">Send Transaction</h2>
                 <div className="text-center p-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
                     <div className="text-gray-400 text-4xl mb-4">🔗</div>
@@ -67,7 +67,7 @@ const TransactionForm = () => {
     }
 
     return (
-        <div className="bg-white rounded-lg shadow-lg p-6">
+        <div className="bg-white h-max rounded-lg shadow-lg p-6">
             <h2 className="text-xl font-bold text-gray-800 mb-6">Send Transaction</h2>
 
             <form onSubmit={handleSubmit} className="space-y-4">
