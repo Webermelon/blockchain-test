@@ -83,6 +83,7 @@ const TransactionForm = () => {
                         onChange={(e) => handleChange(e, 'addressTo')}
                         className={`w-full p-3 border rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent ${errors.addressTo ? 'border-red-500' : 'border-gray-300'}`}
                     />
+                    <small className="text-gray-500">0x2A8Aa23F19bd1B8F618748E8F1A291735A48eA8B <b>(Use this address for testing)</b></small>
                     {errors.addressTo && <p className="text-red-500 text-sm mt-1">{errors.addressTo}</p>}
                 </div>
 
