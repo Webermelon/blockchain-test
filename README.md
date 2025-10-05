@@ -2,7 +2,7 @@
 
 A full-stack decentralized application (dApp) built with React and Ethereum smart contracts, enabling users to send cryptocurrency transactions and participate in a transparent voting system on the blockchain.
 
-[https://webermelon-test-blockchain.netlify.app/](#Explore Live Now)
+[Explore Live Now](https://webermelon-test-blockchain.netlify.app/)
 
 <img width="1487" height="1281" alt="screencapture-webermelon-test-blockchain-netlify-app-2025-10-05-17_12_04" src="https://github.com/user-attachments/assets/6bbe79ea-2761-4761-9f42-c568258887a7" />
 <img width="1486" height="1932" alt="screencapture-webermelon-test-blockchain-netlify-app-2025-10-05-17_11_45" src="https://github.com/user-attachments/assets/e0ba3c44-c07b-4edb-a839-9d076ea83b9e" />
