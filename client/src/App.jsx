@@ -2,6 +2,8 @@
 import Wallet from "./components/Wallet";
 import TransactionForm from "./components/TransactionForm";
 import TransactionList from "./components/TransactionList";
+import VotingPanel from "./components/VotingPanel";
+import CandidateList from "./components/CandidateList";
 import { useEthereum } from "./context/EthereumContext";
 
 const App = () => {
@@ -21,9 +23,11 @@ const App = () => {
                 <div className="grid lg:grid-cols-2 gap-8 mb-8">
                     <Wallet />
                     {appMode === 'transactions' && <TransactionForm />}
+                    {appMode === 'votes' && <VotingPanel />}
                 </div>
 
                 {appMode === 'transactions' && <TransactionList />}
+                {appMode === 'votes' && <CandidateList />}
             </div>
         </div>
     </>;
