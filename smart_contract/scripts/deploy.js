@@ -1,15 +1,20 @@
 const hre = require("hardhat");
 
 async function main() {
-    console.log("Deploying Transaction contract...");
 
-    const Transactions = await hre.ethers.getContractFactory("Transactions");
-    const transactions = await Transactions.deploy();
+    const CONTRACTS = ["VotingSystem"];
 
-    await transactions.waitForDeployment();
+    for (const contractName of CONTRACTS) {
+        console.log(`Deploying ${contractName}...`);
 
-    const address = await transactions.getAddress();
-    console.log("Transaction deployed to:", address);
+        const Contract = await hre.ethers.getContractFactory(contractName);
+        const contract = await Contract.deploy();
+
+        await contract.waitForDeployment();
+
+        const address = await contract.getAddress();
+        console.log(`${contractName} deployed to:`, address);
+    }
 }
 
 main()
