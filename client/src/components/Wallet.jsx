@@ -4,7 +4,7 @@ const Wallet = () => {
     const { connectWallet, currentAccount, transactionCount, balance, truncateAddress } = useTransaction();
 
     return (
-        <div className="bg-white rounded-lg shadow-lg p-6">
+        <div className="h-max bg-white rounded-lg shadow-lg p-6">
             <h2 className="text-xl font-bold text-gray-800 mb-4">Wallet</h2>
 
             <div className="relative overflow-hidden rounded-lg bg-gradient-to-br from-purple-500 via-fuchsia-500 to-purple-400 p-6 text-white mb-4">

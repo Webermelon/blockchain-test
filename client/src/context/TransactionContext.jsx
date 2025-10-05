@@ -37,29 +37,52 @@ export const TransactionProvider = ({ children }) => {
         setFormData((prevState) => ({ ...prevState, [name]: e.target.value }));
     }
 
-    // Simple storage for transaction hashes
-    const storeTransactionHash = (hash, txData) => {
-        const key = `tx_${hash}`;
-        localStorage.setItem(key, JSON.stringify(txData));
+    const cleanUpOldTransactions = () => {
+        const weekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+            const storageKey = localStorage.key(i);
+            if (storageKey && storageKey.startsWith('tx_')) {
+                const storedTimestamp = parseInt(storageKey.replace('tx_', ''));
+                if (storedTimestamp < weekAgo) {
+                    localStorage.removeItem(storageKey);
+                }
+            }
+        }
     };
 
-    // Simple hash lookup from localStorage
-    const getTransactionHash = (sender, receiver, amount, keyword, message) => {
+    // Store transaction hash with data and timestamp
+    const storeTransactionHash = (hash, txData, timestamp) => {
+        const key = `tx_${timestamp}`;
+        localStorage.setItem(key, JSON.stringify({ hash, ...txData }));
+    };
+
+    // Match transaction by timestamp AND transaction data
+    const getTransactionHash = (blockchainTimestamp, sender, receiver, amount, keyword, message) => {
+        const timestampMs = blockchainTimestamp * 1000;
+        const tolerance = 15000; // 15 seconds
+
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
             if (key && key.startsWith('tx_')) {
-                try {
-                    const stored = JSON.parse(localStorage.getItem(key));
-                    if (stored &&
-                        stored.from.toLowerCase() === sender.toLowerCase() &&
-                        stored.to.toLowerCase() === receiver.toLowerCase() &&
-                        Math.abs(stored.amount - amount) < 0.0001 &&
-                        stored.keyword === keyword &&
-                        stored.message === message) {
-                        return key.replace('tx_', '');
+                const storedTimestamp = parseInt(key.replace('tx_', ''));
+
+                // First check: timestamp within tolerance
+                if (Math.abs(storedTimestamp - timestampMs) <= tolerance) {
+                    try {
+                        const stored = JSON.parse(localStorage.getItem(key));
+
+                        // Second check: match transaction data
+                        if (stored &&
+                            stored.from.toLowerCase() === sender.toLowerCase() &&
+                            stored.to.toLowerCase() === receiver.toLowerCase() &&
+                            Math.abs(stored.amount - amount) < 0.0001 &&
+                            stored.keyword === keyword &&
+                            stored.message === message) {
+                            return stored.hash;
+                        }
+                    } catch (e) {
+                        console.error("Error parsing transaction:", e);
                     }
-                } catch (e) {
-                    console.error("Error parsing transaction from localStorage:", e);
                 }
             }
         }
@@ -100,6 +123,7 @@ export const TransactionProvider = ({ children }) => {
             const structuredTransactions = availableTransactions.map(transaction => {
                 const amount = parseInt(transaction.amount) / (10 ** 18);
                 const hash = getTransactionHash(
+                    Number(transaction.timestamp),
                     transaction.sender,
                     transaction.receiver,
                     amount,
@@ -143,20 +167,21 @@ export const TransactionProvider = ({ children }) => {
                 { value: parsedAmount }
             );
 
-            // Store transaction data
-            storeTransactionHash(transactionHash.hash, {
-                from: currentAccount,
-                to: addressTo,
-                amount: parseFloat(amount),
-                keyword: keyword,
-                message: message
-            });
+            // Store transaction hash with data and timestamp
+            storeTransactionHash(
+                transactionHash.hash,
+                {
+                    from: currentAccount,
+                    to: addressTo,
+                    amount: parseFloat(amount),
+                    keyword: keyword,
+                    message: message
+                },
+                Date.now()
+            );
 
             await transactionHash.wait();
             alert(`Transaction sent! Hash: ${transactionHash.hash}`);
-
-            // TODO: Add timestamp or more unique data to distinguish transactions hash collisions
-            console.log('Transaction sent!', transactionHash);
 
             // Refresh data
             await loadAllTransactions();
@@ -170,6 +195,7 @@ export const TransactionProvider = ({ children }) => {
     };
 
     useEffect(() => {
+        cleanUpOldTransactions(); // Clean up old transactions (older than 7 days)
         checkIfWalletIsConnected();
     }, []);
 

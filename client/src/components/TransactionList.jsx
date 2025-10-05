@@ -55,6 +55,25 @@ const TransactionList = () => {
         );
     }
 
+    const getEtherscanAddress = (addressTo) => <>
+        <div className="flex items-center">
+            <a href={`https://sepolia.etherscan.io/address/${addressTo}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-0.5 text-sm font-medium text-gray-900 group hover:text-purple-600 transition-colors">
+                <svg className="w-3 h-3 mr-1 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+                {truncateAddress(addressTo)}
+            </a>
+            {addressTo.toLowerCase() === currentAccount.toLowerCase() && (
+                <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    You
+                </span>
+            )}
+        </div>
+    </>;
+
     return (
         <div className="mt-12">
             <div className="flex justify-between items-center mb-6">
@@ -87,7 +106,7 @@ const TransactionList = () => {
                 </div>
             ) : (
                 <div className="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200">
-                    <div className="overflow-x-auto">
+                    <div className="max-h-screen overflow-auto">
                         <table className="w-full table-auto">
                             <thead className="bg-gray-50 border-b border-gray-200">
                                 <tr>
@@ -101,31 +120,13 @@ const TransactionList = () => {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200">
-                                {transactions.map((transaction, index) => (
+                                {transactions.reverse().slice(0, 500).map((transaction, index) => (
                                     <tr key={index} className="hover:bg-gray-50 transition-colors">
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="flex items-center">
-                                                <div className="text-sm font-medium text-gray-900">
-                                                    {truncateAddress(transaction.addressFrom)}
-                                                </div>
-                                                {transaction.addressFrom.toLowerCase() === currentAccount.toLowerCase() && (
-                                                    <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                                        You
-                                                    </span>
-                                                )}
-                                            </div>
+                                            {getEtherscanAddress(transaction.addressFrom)}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="flex items-center">
-                                                <div className="text-sm font-medium text-gray-900">
-                                                    {truncateAddress(transaction.addressTo)}
-                                                </div>
-                                                {transaction.addressTo.toLowerCase() === currentAccount.toLowerCase() && (
-                                                    <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                        You
-                                                    </span>
-                                                )}
-                                            </div>
+                                            {getEtherscanAddress(transaction.addressTo)}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="text-sm font-bold text-gray-900">
@@ -133,12 +134,12 @@ const TransactionList = () => {
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getKeywordBadgeColor(transaction.keyword)}`}>
+                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${getKeywordBadgeColor(transaction.keyword)}`}>
                                                 {transaction.keyword}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <div className="text-sm text-gray-900 max-w-xs truncate" title={transaction.message}>
+                                            <div className="text-sm text-gray-900 max-w-52 truncate" title={transaction.message}>
                                                 {transaction.message || 'No message'}
                                             </div>
                                         </td>
