@@ -23,6 +23,7 @@ export const VotingProvider = ({ children }) => {
     const [totalVotes, setTotalVotes] = useState(0);
     const [voterInfo, setVoterInfo] = useState(null);
     const [isOwner, setIsOwner] = useState(false);
+    const [registeredVoters, setRegisteredVoters] = useState([]);
 
     const getVotingContract = async () => {
         const provider = new ethers.BrowserProvider(ethereum);
@@ -101,6 +102,39 @@ export const VotingProvider = ({ children }) => {
         }
     };
 
+    const loadRegisteredVoters = async () => {
+        try {
+            if (!ethereum) return;
+
+            const votingContract = await getVotingContract();
+
+            // Get VoterRegistered events
+            const filter = votingContract.filters.VoterRegistered();
+            const events = await votingContract.queryFilter(filter);
+
+            // Extract unique voter addresses from events
+            const voterAddresses = [...new Set(events.map(event => event.args.voter))];
+
+            // Fetch voter info for each address
+            const votersData = await Promise.all(
+                voterAddresses.map(async (address) => {
+                    const voter = await votingContract.getVoter(address);
+                    return {
+                        address: address,
+                        isRegistered: voter.isRegistered,
+                        hasVoted: voter.hasVoted,
+                        votedCandidateId: Number(voter.votedCandidateId),
+                        isActive: voter.isActive
+                    };
+                })
+            );
+
+            setRegisteredVoters(votersData);
+        } catch (error) {
+            console.error("Error loading registered voters:", error);
+        }
+    };
+
     const vote = async (candidateId) => {
         try {
             if (!ethereum) return alert("Please install MetaMask.");
@@ -153,8 +187,28 @@ export const VotingProvider = ({ children }) => {
 
             alert("Voter registered successfully!");
             await loadVoterInfo();
+            await loadRegisteredVoters();
         } catch (error) {
             alert(`Failed to register voter: ${error.message}`);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const deleteVoter = async (voterAddress) => {
+        try {
+            if (!ethereum) return alert("Please install MetaMask.");
+
+            setIsLoading(true);
+            const votingContract = await getVotingContract();
+
+            const tx = await votingContract.deleteVoter(voterAddress);
+            await tx.wait();
+
+            alert("Voter removed successfully!");
+            await loadRegisteredVoters();
+        } catch (error) {
+            alert(`Failed to remove voter: ${error.message}`);
         } finally {
             setIsLoading(false);
         }
@@ -203,6 +257,7 @@ export const VotingProvider = ({ children }) => {
             loadVotingStatus();
             loadVoterInfo();
             checkIsOwner();
+            loadRegisteredVoters();
         }
     }, [currentAccount]);
 
@@ -214,14 +269,17 @@ export const VotingProvider = ({ children }) => {
             totalVotes,
             voterInfo,
             isOwner,
+            registeredVoters,
             vote,
             addCandidate,
             registerVoter,
+            deleteVoter,
             toggleVoting,
             getWinner,
             loadCandidates,
             loadVotingStatus,
             loadVoterInfo,
+            loadRegisteredVoters,
         }}>
             {children}
         </VotingContext.Provider>
