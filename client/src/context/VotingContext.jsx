@@ -38,7 +38,7 @@ export const VotingProvider = ({ children }) => {
             setIsLoading(true);
 
             const votingContract = await getVotingContract();
-            const allCandidates = await votingContract.getActiveCandidates();
+            const allCandidates = await votingContract.getAllCandidates();
 
             const formattedCandidates = allCandidates.map(candidate => ({
                 id: Number(candidate.id),
@@ -175,6 +175,44 @@ export const VotingProvider = ({ children }) => {
         }
     };
 
+    const updateCandidate = async (candidateId, name, description) => {
+        try {
+            if (!ethereum) return alert("Please install MetaMask.");
+
+            setIsLoading(true);
+            const votingContract = await getVotingContract();
+
+            const tx = await votingContract.updateCandidate(candidateId, name, description);
+            await tx.wait();
+
+            alert("Candidate updated successfully!");
+            await loadCandidates();
+        } catch (error) {
+            alert(`Failed to update candidate: ${error.message}`);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const deleteCandidate = async (candidateId) => {
+        try {
+            if (!ethereum) return alert("Please install MetaMask.");
+
+            setIsLoading(true);
+            const votingContract = await getVotingContract();
+
+            const tx = await votingContract.deleteCandidate(candidateId);
+            await tx.wait();
+
+            alert("Candidate deleted successfully!");
+            await loadCandidates();
+        } catch (error) {
+            alert(`Failed to delete candidate: ${error.message}`);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const registerVoter = async (voterAddress) => {
         try {
             if (!ethereum) return alert("Please install MetaMask.");
@@ -272,6 +310,8 @@ export const VotingProvider = ({ children }) => {
             registeredVoters,
             vote,
             addCandidate,
+            updateCandidate,
+            deleteCandidate,
             registerVoter,
             deleteVoter,
             toggleVoting,

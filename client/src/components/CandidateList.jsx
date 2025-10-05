@@ -8,6 +8,9 @@ const CandidateList = () => {
     const [winner, setWinner] = useState(null);
     const [isLoadingWinner, setIsLoadingWinner] = useState(false);
 
+    // Filter to show only active candidates
+    const activeCandidates = candidates.filter(candidate => candidate.isActive);
+
     const handleVote = async (candidateId) => {
         if (!voterInfo?.isRegistered) {
             alert("You are not registered to vote");
@@ -69,7 +72,7 @@ const CandidateList = () => {
                 <h3 className="text-xl font-bold text-gray-800">Candidates</h3>
                 <div className="flex items-center space-x-4">
                     <span className="text-sm text-gray-600">
-                        Total: {candidates.length} candidate{candidates.length !== 1 ? 's' : ''}
+                        Active: {activeCandidates.length} candidate{activeCandidates.length !== 1 ? 's' : ''}
                     </span>
                     <button
                         onClick={handleRefresh}
@@ -111,15 +114,15 @@ const CandidateList = () => {
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
                     <span className="ml-4 text-gray-600">Loading candidates...</span>
                 </div>
-            ) : candidates.length === 0 ? (
+            ) : activeCandidates.length === 0 ? (
                 <div className="text-center p-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
                     <div className="text-gray-400 text-6xl mb-4">🗳️</div>
-                    <h4 className="text-lg font-medium text-gray-600 mb-2">No candidates yet</h4>
-                    <p className="text-gray-500">Candidates will appear here once they are added by the admin</p>
+                    <h4 className="text-lg font-medium text-gray-600 mb-2">No active candidates</h4>
+                    <p className="text-gray-500">Active candidates will appear here once they are added by the admin</p>
                 </div>
             ) : (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {candidates.map((candidate) => {
+                    {activeCandidates.map((candidate) => {
                         const hasVotedForThis = voterInfo?.hasVoted && voterInfo?.votedCandidateId === candidate.id;
                         const canVote = voterInfo?.isRegistered && !voterInfo?.hasVoted && votingActive;
 

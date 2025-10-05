@@ -4,13 +4,15 @@ import { useVoting } from "../context/VotingContext";
 
 const VotingPanel = () => {
     const { currentAccount, truncateAddress } = useEthereum();
-    const { isOwner, votingActive, totalVotes, voterInfo, toggleVoting, addCandidate, registerVoter, deleteVoter, registeredVoters, isLoading } = useVoting();
+    const { isOwner, votingActive, totalVotes, voterInfo, toggleVoting, addCandidate, updateCandidate, deleteCandidate, registerVoter, deleteVoter, candidates, registeredVoters, isLoading } = useVoting();
 
     const [candidateName, setCandidateName] = useState("");
     const [candidateDescription, setCandidateDescription] = useState("");
     const [voterAddress, setVoterAddress] = useState("");
     const [showVotersTable, setShowVotersTable] = useState(false);
+    const [showCandidatesTable, setShowCandidatesTable] = useState(false);
     const [showOwnerControls, setShowOwnerControls] = useState(false);
+    const [editingCandidate, setEditingCandidate] = useState(null);
 
     const handleAddCandidate = async (e) => {
         e.preventDefault();
@@ -37,6 +39,26 @@ const VotingPanel = () => {
         const confirmed = window.confirm(`Are you sure you want to remove voter ${truncateAddress(address)}?`);
         if (confirmed) {
             await deleteVoter(address);
+        }
+    };
+
+    const handleEditCandidate = (candidate) => {
+        setEditingCandidate(candidate);
+    };
+
+    const handleUpdateCandidate = async (candidateId, name, description) => {
+        if (!name.trim()) {
+            alert("Please enter candidate name");
+            return;
+        }
+        await updateCandidate(candidateId, name, description);
+        setEditingCandidate(null);
+    };
+
+    const handleDeleteCandidate = async (candidateId, candidateName) => {
+        const confirmed = window.confirm(`Are you sure you want to delete candidate "${candidateName}"?`);
+        if (confirmed) {
+            await deleteCandidate(candidateId);
         }
     };
 
@@ -174,7 +196,7 @@ const VotingPanel = () => {
                             </form>
 
                             {/* Registered Voters Table */}
-                            <div className="p-3 bg-white rounded border border-gray-200">
+                            <div className="p-3 bg-white rounded border border-gray-200 mb-4">
                                 <div className="flex justify-between items-center">
                                     <h4 className="font-medium text-gray-700 text-sm">Registered Voters</h4>
                                     <button
@@ -237,6 +259,140 @@ const VotingPanel = () => {
                                                                                 <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
                                                                             </svg>
                                                                         </button>
+                                                                    )}
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Registered Candidates Table */}
+                            <div className="p-3 bg-white rounded border border-gray-200">
+                                <div className="flex justify-between items-center">
+                                    <h4 className="font-medium text-gray-700 text-sm">Registered Candidates</h4>
+                                    <button
+                                        onClick={() => setShowCandidatesTable(!showCandidatesTable)}
+                                        className="text-xs text-purple-600 hover:text-purple-800 font-medium"
+                                    >
+                                        {showCandidatesTable ? 'Hide' : 'Show'} ({candidates.length})
+                                    </button>
+                                </div>
+
+                                {showCandidatesTable && (
+                                    <div className="mt-2">
+                                        {candidates.length === 0 ? (
+                                            <p className="text-xs text-gray-500 text-center py-4">No candidates added yet</p>
+                                        ) : (
+                                            <div className="max-h-64 overflow-auto border border-gray-200 rounded">
+                                                <table className="w-full text-xs">
+                                                    <thead className="bg-gray-50 sticky top-0">
+                                                        <tr>
+                                                            <th className="px-3 py-2 text-left font-medium text-gray-700">ID</th>
+                                                            <th className="px-3 py-2 text-left font-medium text-gray-700">Name</th>
+                                                            <th className="px-3 py-2 text-left font-medium text-gray-700">Description</th>
+                                                            <th className="px-3 py-2 text-center font-medium text-gray-700">Votes</th>
+                                                            <th className="px-3 py-2 text-center font-medium text-gray-700">Status</th>
+                                                            <th className="px-3 py-2 text-center font-medium text-gray-700">Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody className="divide-y divide-gray-200">
+                                                        {candidates.map((candidate) => (
+                                                            <tr key={candidate.id} className="hover:bg-gray-50">
+                                                                <td className="px-3 py-2">
+                                                                    #{candidate.id}
+                                                                </td>
+                                                                <td className="px-3 py-2">
+                                                                    {editingCandidate?.id === candidate.id ? (
+                                                                        <input
+                                                                            type="text"
+                                                                            defaultValue={candidate.name}
+                                                                            onChange={(e) => setEditingCandidate({ ...editingCandidate, name: e.target.value })}
+                                                                            className="w-full min-w-20 p-1 border border-gray-300 rounded text-xs"
+                                                                        />
+                                                                    ) : (
+                                                                        <span className="font-medium">{candidate.name}</span>
+                                                                    )}
+                                                                </td>
+                                                                <td className="px-3 py-2">
+                                                                    {editingCandidate?.id === candidate.id ? (
+                                                                        <input
+                                                                            type="text"
+                                                                            defaultValue={candidate.description}
+                                                                            onChange={(e) => setEditingCandidate({ ...editingCandidate, description: e.target.value })}
+                                                                            className="w-full min-w-30 p-1 border border-gray-300 rounded text-xs"
+                                                                        />
+                                                                    ) : (
+                                                                        <span className="text-gray-600 truncate max-w-xs block" title={candidate.description}>
+                                                                            {candidate.description || 'No description'}
+                                                                        </span>
+                                                                    )}
+                                                                </td>
+                                                                <td className="px-3 py-2 text-center">
+                                                                    <span className="font-bold text-purple-600">{candidate.voteCount}</span>
+                                                                </td>
+                                                                <td className="px-3 py-2 text-center">
+                                                                    {candidate.isActive ? (
+                                                                        <span className="text-green-600 text-xs">Active</span>
+                                                                    ) : (
+                                                                        <span className="text-red-600 text-xs">Deleted</span>
+                                                                    )}
+                                                                </td>
+                                                                <td className="px-3 py-2 text-center">
+                                                                    {candidate.isActive && (
+                                                                        <div className="flex items-center justify-center gap-2">
+                                                                            {editingCandidate?.id === candidate.id ? (
+                                                                                <>
+                                                                                    <button
+                                                                                        onClick={() => handleUpdateCandidate(candidate.id, editingCandidate.name, editingCandidate.description)}
+                                                                                        disabled={isLoading}
+                                                                                        className="text-green-600 hover:text-green-800 font-medium disabled:text-gray-400 disabled:cursor-not-allowed"
+                                                                                        title="Save changes"
+                                                                                    >
+                                                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4">
+                                                                                            <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                                                                                        </svg>
+                                                                                    </button>
+                                                                                    <button
+                                                                                        onClick={() => setEditingCandidate(null)}
+                                                                                        disabled={isLoading}
+                                                                                        className="text-gray-600 hover:text-gray-800 font-medium disabled:text-gray-400 disabled:cursor-not-allowed"
+                                                                                        title="Cancel"
+                                                                                    >
+                                                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4">
+                                                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                                                                        </svg>
+                                                                                    </button>
+                                                                                </>
+                                                                            ) : (
+                                                                                <>
+                                                                                    <button
+                                                                                        onClick={() => handleEditCandidate(candidate)}
+                                                                                        disabled={isLoading}
+                                                                                        className="text-blue-600 hover:text-blue-800 font-medium disabled:text-gray-400 disabled:cursor-not-allowed"
+                                                                                        title="Edit candidate"
+                                                                                    >
+                                                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4">
+                                                                                            <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                                                                                        </svg>
+                                                                                    </button>
+                                                                                    <button
+                                                                                        onClick={() => handleDeleteCandidate(candidate.id, candidate.name)}
+                                                                                        disabled={isLoading}
+                                                                                        className="text-red-600 hover:text-red-800 font-medium disabled:text-gray-400 disabled:cursor-not-allowed"
+                                                                                        title="Delete candidate"
+                                                                                    >
+                                                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4">
+                                                                                            <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                                                                        </svg>
+                                                                                    </button>
+                                                                                </>
+                                                                            )}
+                                                                        </div>
                                                                     )}
                                                                 </td>
                                                             </tr>
