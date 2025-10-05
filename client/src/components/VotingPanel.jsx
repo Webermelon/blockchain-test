@@ -10,6 +10,7 @@ const VotingPanel = () => {
     const [candidateDescription, setCandidateDescription] = useState("");
     const [voterAddress, setVoterAddress] = useState("");
     const [showVotersTable, setShowVotersTable] = useState(false);
+    const [showOwnerControls, setShowOwnerControls] = useState(false);
 
     const handleAddCandidate = async (e) => {
         e.preventDefault();
@@ -60,7 +61,7 @@ const VotingPanel = () => {
                 <div className="flex justify-between items-center mb-2">
                     <span className="font-medium text-gray-700">Voting Status:</span>
                     <span className={`px-3 py-1 rounded-full text-sm font-medium ${votingActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                        {votingActive ? '✅ Active' : '❌ Inactive'}
+                        {votingActive ? 'Active' : 'Inactive'}
                     </span>
                 </div>
                 <div className="flex justify-between items-center">
@@ -100,143 +101,153 @@ const VotingPanel = () => {
             {isOwner && (
                 <div className="space-y-6">
                     <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                        <div className="flex items-center mb-3">
+                        <div className="flex items-center relative">
                             <span className="text-yellow-600 text-xl mr-2">👑</span>
                             <h3 className="font-bold text-gray-800">Owner Controls</h3>
-                        </div>
 
-                        {/* Voting Control */}
-                        <div className="mb-4">
                             <button
-                                onClick={() => toggleVoting(!votingActive)}
-                                disabled={isLoading}
-                                className={`w-full py-2 px-4 rounded-md font-medium transition-colors ${votingActive
-                                    ? 'bg-red-500 hover:bg-red-600 text-white'
-                                    : 'bg-green-500 hover:bg-green-600 text-white'
-                                    } disabled:bg-gray-400 disabled:cursor-not-allowed`}
+                                onClick={() => setShowOwnerControls(!showOwnerControls)}
+                                className="absolute right-0 top-0 mt-1 mr-1 text-sm text-purple-600 hover:text-purple-800 font-medium"
                             >
-                                {votingActive ? 'Stop Voting' : 'Start Voting'}
+                                {showOwnerControls ? 'Hide Controls' : 'Show Controls'}
                             </button>
                         </div>
 
-                        {/* Add Candidate Form */}
-                        <form onSubmit={handleAddCandidate} className="mb-4 p-3 bg-white rounded border border-gray-200">
-                            <h4 className="font-medium text-gray-700 mb-2 text-sm">Add Candidate</h4>
-                            <input
-                                type="text"
-                                placeholder="Candidate Name"
-                                value={candidateName}
-                                onChange={(e) => setCandidateName(e.target.value)}
-                                className="w-full p-2 mb-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                            />
-                            <textarea
-                                placeholder="Description (optional)"
-                                value={candidateDescription}
-                                onChange={(e) => setCandidateDescription(e.target.value)}
-                                rows="2"
-                                className="w-full p-2 mb-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
-                            />
-                            <button
-                                type="submit"
-                                disabled={isLoading}
-                                className="w-full py-2 px-4 bg-purple-500 hover:bg-purple-600 text-white rounded-md font-medium transition-colors text-sm disabled:bg-gray-400 disabled:cursor-not-allowed"
-                            >
-                                Add Candidate
-                            </button>
-                        </form>
-
-                        {/* Register Voter Form */}
-                        <form onSubmit={handleRegisterVoter} className="mb-4 p-3 bg-white rounded border border-gray-200">
-                            <h4 className="font-medium text-gray-700 mb-2 text-sm">Register Voter</h4>
-                            <input
-                                type="text"
-                                placeholder="Voter Address (0x...)"
-                                value={voterAddress}
-                                onChange={(e) => setVoterAddress(e.target.value)}
-                                className="w-full p-2 mb-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                            />
-                            <button
-                                type="submit"
-                                disabled={isLoading}
-                                className="w-full py-2 px-4 bg-purple-500 hover:bg-purple-600 text-white rounded-md font-medium transition-colors text-sm disabled:bg-gray-400 disabled:cursor-not-allowed"
-                            >
-                                Register Voter
-                            </button>
-                        </form>
-
-                        {/* Registered Voters Table */}
-                        <div className="p-3 bg-white rounded border border-gray-200">
-                            <div className="flex justify-between items-center">
-                                <h4 className="font-medium text-gray-700 text-sm">Registered Voters</h4>
+                        {showOwnerControls && <>
+                            {/* Voting Control */}
+                            <div className="mt-4 mb-4">
                                 <button
-                                    onClick={() => setShowVotersTable(!showVotersTable)}
-                                    className="text-xs text-purple-600 hover:text-purple-800 font-medium"
+                                    onClick={() => toggleVoting(!votingActive)}
+                                    disabled={isLoading}
+                                    className={`w-full py-2 px-4 rounded-md font-medium transition-colors ${votingActive
+                                        ? 'bg-red-500 hover:bg-red-600 text-white'
+                                        : 'bg-green-500 hover:bg-green-600 text-white'
+                                        } disabled:bg-gray-400 disabled:cursor-not-allowed`}
                                 >
-                                    {showVotersTable ? 'Hide' : 'Show'} ({registeredVoters.length})
+                                    {votingActive ? 'Stop Voting' : 'Start Voting'}
                                 </button>
                             </div>
 
-                            {showVotersTable && (
-                                <div className="mt-2">
-                                    {registeredVoters.length === 0 ? (
-                                        <p className="text-xs text-gray-500 text-center py-4">No voters registered yet</p>
-                                    ) : (
-                                        <div className="max-h-64 overflow-auto border border-gray-200 rounded">
-                                            <table className="w-full text-xs">
-                                                <thead className="bg-gray-50 sticky top-0">
-                                                    <tr>
-                                                        <th className="px-3 py-2 text-left font-medium text-gray-700">Address</th>
-                                                        <th className="px-3 py-2 text-center font-medium text-gray-700">Voted</th>
-                                                        <th className="px-3 py-2 text-center font-medium text-gray-700">Status</th>
-                                                        <th className="px-3 py-2 text-center font-medium text-gray-700">Action</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody className="divide-y divide-gray-200">
-                                                    {registeredVoters.map((voter, index) => (
-                                                        <tr key={index} className="hover:bg-gray-50">
-                                                            <td className="px-3 py-2">
-                                                                <span className="font-mono" title={voter.address}>
-                                                                    {truncateAddress(voter.address)}
-                                                                </span>
-                                                                {voter.address.toLowerCase() === currentAccount.toLowerCase() && (
-                                                                    <span className="ml-1 text-xs bg-blue-100 text-blue-800 px-1 rounded">You</span>
-                                                                )}
-                                                            </td>
-                                                            <td className="px-3 py-2 text-center">
-                                                                {voter.hasVoted ? (
-                                                                    <span className="text-green-600">✓</span>
-                                                                ) : (
-                                                                    <span className="text-gray-400">✗</span>
-                                                                )}
-                                                            </td>
-                                                            <td className="px-3 py-2 text-center">
-                                                                {voter.isActive ? (
-                                                                    <span className="text-green-600 text-xs">Active</span>
-                                                                ) : (
-                                                                    <span className="text-red-600 text-xs">Deleted</span>
-                                                                )}
-                                                            </td>
-                                                            <td className="px-3 py-2 text-center">
-                                                                {voter.isActive && (
-                                                                    <button
-                                                                        onClick={() => handleDeleteVoter(voter.address)}
-                                                                        disabled={isLoading}
-                                                                        className="text-red-600 hover:text-red-800 font-medium disabled:text-gray-400 disabled:cursor-not-allowed"
-                                                                        title="Remove voter"
-                                                                    >
-                                                                        🗑️
-                                                                    </button>
-                                                                )}
-                                                            </td>
-                                                        </tr>
-                                                    ))}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    )}
+                            {/* Add Candidate Form */}
+                            <form onSubmit={handleAddCandidate} className="mb-4 p-3 bg-white rounded border border-gray-200">
+                                <h4 className="font-medium text-gray-700 mb-2 text-sm">Add Candidate</h4>
+                                <input
+                                    type="text"
+                                    placeholder="Candidate Name"
+                                    value={candidateName}
+                                    onChange={(e) => setCandidateName(e.target.value)}
+                                    className="w-full p-2 mb-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                />
+                                <textarea
+                                    placeholder="Description (optional)"
+                                    value={candidateDescription}
+                                    onChange={(e) => setCandidateDescription(e.target.value)}
+                                    rows="2"
+                                    className="w-full p-2 mb-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                                />
+                                <button
+                                    type="submit"
+                                    disabled={isLoading}
+                                    className="w-full py-2 px-4 bg-purple-500 hover:bg-purple-600 text-white rounded-md font-medium transition-colors text-sm disabled:bg-gray-400 disabled:cursor-not-allowed"
+                                >
+                                    Add Candidate
+                                </button>
+                            </form>
+
+                            {/* Register Voter Form */}
+                            <form onSubmit={handleRegisterVoter} className="mb-4 p-3 bg-white rounded border border-gray-200">
+                                <h4 className="font-medium text-gray-700 mb-2 text-sm">Register Voter</h4>
+                                <input
+                                    type="text"
+                                    placeholder="Voter Address (0x...)"
+                                    value={voterAddress}
+                                    onChange={(e) => setVoterAddress(e.target.value)}
+                                    className="w-full p-2 mb-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                />
+                                <button
+                                    type="submit"
+                                    disabled={isLoading}
+                                    className="w-full py-2 px-4 bg-purple-500 hover:bg-purple-600 text-white rounded-md font-medium transition-colors text-sm disabled:bg-gray-400 disabled:cursor-not-allowed"
+                                >
+                                    Register Voter
+                                </button>
+                            </form>
+
+                            {/* Registered Voters Table */}
+                            <div className="p-3 bg-white rounded border border-gray-200">
+                                <div className="flex justify-between items-center">
+                                    <h4 className="font-medium text-gray-700 text-sm">Registered Voters</h4>
+                                    <button
+                                        onClick={() => setShowVotersTable(!showVotersTable)}
+                                        className="text-xs text-purple-600 hover:text-purple-800 font-medium"
+                                    >
+                                        {showVotersTable ? 'Hide' : 'Show'} ({registeredVoters.length})
+                                    </button>
                                 </div>
-                            )}
-                        </div>
+
+                                {showVotersTable && (
+                                    <div className="mt-2">
+                                        {registeredVoters.length === 0 ? (
+                                            <p className="text-xs text-gray-500 text-center py-4">No voters registered yet</p>
+                                        ) : (
+                                            <div className="max-h-64 overflow-auto border border-gray-200 rounded">
+                                                <table className="w-full text-xs">
+                                                    <thead className="bg-gray-50 sticky top-0">
+                                                        <tr>
+                                                            <th className="px-3 py-2 text-left font-medium text-gray-700">Address</th>
+                                                            <th className="px-3 py-2 text-center font-medium text-gray-700">Voted</th>
+                                                            <th className="px-3 py-2 text-center font-medium text-gray-700">Status</th>
+                                                            <th className="px-3 py-2 text-center font-medium text-gray-700">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody className="divide-y divide-gray-200">
+                                                        {registeredVoters.map((voter, index) => (
+                                                            <tr key={index} className="hover:bg-gray-50">
+                                                                <td className="px-3 py-2">
+                                                                    <span className="font-mono" title={voter.address}>
+                                                                        {truncateAddress(voter.address)}
+                                                                    </span>
+                                                                    {voter.address.toLowerCase() === currentAccount.toLowerCase() && (
+                                                                        <span className="ml-1 text-xs bg-blue-100 text-blue-800 px-1 rounded">You</span>
+                                                                    )}
+                                                                </td>
+                                                                <td className="px-3 py-2 text-center">
+                                                                    {voter.hasVoted ? (
+                                                                        <span className="text-green-600">✓</span>
+                                                                    ) : (
+                                                                        <span className="text-gray-400">✗</span>
+                                                                    )}
+                                                                </td>
+                                                                <td className="px-3 py-2 text-center">
+                                                                    {voter.isActive ? (
+                                                                        <span className="text-green-600 text-xs">Active</span>
+                                                                    ) : (
+                                                                        <span className="text-red-600 text-xs">Deleted</span>
+                                                                    )}
+                                                                </td>
+                                                                <td className="px-3 py-2 text-center">
+                                                                    {voter.isActive && (
+                                                                        <button
+                                                                            onClick={() => handleDeleteVoter(voter.address)}
+                                                                            disabled={isLoading}
+                                                                            className="text-red-600 hover:text-red-800 font-medium disabled:text-gray-400 disabled:cursor-not-allowed"
+                                                                            title="Remove voter"
+                                                                        >
+                                                                            🗑️
+                                                                        </button>
+                                                                    )}
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        </>}
+
                     </div>
                 </div>
             )}
