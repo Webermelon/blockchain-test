@@ -57,11 +57,11 @@ const Wallet = () => {
             ) : (
                 <div className="space-y-3">
                     <div className="flex items-center justify-center space-x-2 text-green-600 bg-green-50 py-2 px-4 rounded-md">
-                        <span>✅</span>
+                        <span>&#10003;</span>
                         <span className="font-medium">Wallet Connected</span>
                     </div>
                     <p className="text-sm text-gray-600 text-center">
-                        You can now send transactions
+                        You can now send transactions and vote
                     </p>
                 </div>
             )}
